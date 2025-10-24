@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { X } from "lucide-react";
+import { X, Upload, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -37,17 +37,60 @@ interface RoomListingFormProps {
 
 export default function RoomListingForm({ room, onClose }: RoomListingFormProps) {
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     title: room?.title || "",
     description: room?.description || "",
     price: room?.price || 0,
     location: room?.location || "",
+    latitude: null as number | null,
+    longitude: null as number | null,
     furnishing_status: room?.furnishing_status || "unfurnished",
     room_type: room?.room_type || "single",
     amenities: room?.amenities || [],
     available_from: room?.available_from || "",
   });
   const [amenityInput, setAmenityInput] = useState("");
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imageUrls, setImageUrls] = useState<string[]>(room?.images || []);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length + imageUrls.length > 5) {
+      toast.error("Maximum 5 images allowed");
+      return;
+    }
+    setImageFiles([...imageFiles, ...files]);
+  };
+
+  const removeImage = (index: number) => {
+    setImageFiles(imageFiles.filter((_, i) => i !== index));
+  };
+
+  const removeUploadedImage = (index: number) => {
+    setImageUrls(imageUrls.filter((_, i) => i !== index));
+  };
+
+  const getCurrentLocation = () => {
+    if (navigator.geolocation) {
+      toast.info("Getting your location...");
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setFormData({
+            ...formData,
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+          toast.success("Location captured!");
+        },
+        (error) => {
+          toast.error("Failed to get location. Please enter manually.");
+        }
+      );
+    } else {
+      toast.error("Geolocation not supported by your browser");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,10 +107,36 @@ export default function RoomListingForm({ room, onClose }: RoomListingFormProps)
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      // Upload images
+      let uploadedImageUrls = [...imageUrls];
+      if (imageFiles.length > 0) {
+        setUploading(true);
+        for (const file of imageFiles) {
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${user.id}/${Date.now()}-${Math.random()}.${fileExt}`;
+          
+          const { error: uploadError, data } = await supabase.storage
+            .from('room-images')
+            .upload(fileName, file);
+
+          if (uploadError) throw uploadError;
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('room-images')
+            .getPublicUrl(fileName);
+
+          uploadedImageUrls.push(publicUrl);
+        }
+        setUploading(false);
+      }
+
       const roomData = {
         ...formData,
         owner_id: user.id,
         price: Number(formData.price),
+        images: uploadedImageUrls,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
       };
 
       if (room?.id) {
@@ -96,6 +165,7 @@ export default function RoomListingForm({ room, onClose }: RoomListingFormProps)
       }
     } finally {
       setLoading(false);
+      setUploading(false);
     }
   };
 
@@ -154,13 +224,77 @@ export default function RoomListingForm({ room, onClose }: RoomListingFormProps)
 
             <div className="space-y-2">
               <Label htmlFor="location">Location *</Label>
-              <Input
-                id="location"
-                value={formData.location}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                placeholder="123 Main St, City"
-                required
-              />
+              <div className="flex gap-2">
+                <Input
+                  id="location"
+                  value={formData.location}
+                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  placeholder="123 Main St, City"
+                  className="flex-1"
+                  required
+                />
+                <Button type="button" variant="outline" onClick={getCurrentLocation}>
+                  <MapPin className="h-4 w-4" />
+                </Button>
+              </div>
+              {formData.latitude && formData.longitude && (
+                <p className="text-xs text-muted-foreground">
+                  Coordinates: {formData.latitude.toFixed(4)}, {formData.longitude.toFixed(4)}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label>Room Images (Max 5)</Label>
+              <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-colors">
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleImageUpload}
+                  className="hidden"
+                  id="image-upload"
+                />
+                <label htmlFor="image-upload" className="cursor-pointer">
+                  <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">
+                    Click to upload images or drag and drop
+                  </p>
+                </label>
+              </div>
+              
+              {(imageUrls.length > 0 || imageFiles.length > 0) && (
+                <div className="grid grid-cols-3 gap-2 mt-2">
+                  {imageUrls.map((url, index) => (
+                    <div key={`uploaded-${index}`} className="relative group">
+                      <img src={url} alt={`Room ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                      <button
+                        type="button"
+                        onClick={() => removeUploadedImage(index)}
+                        className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                  {imageFiles.map((file, index) => (
+                    <div key={`new-${index}`} className="relative group">
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt={`New ${index + 1}`}
+                        className="w-full h-24 object-cover rounded"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -258,8 +392,8 @@ export default function RoomListingForm({ room, onClose }: RoomListingFormProps)
               <Button type="button" variant="outline" onClick={onClose} className="flex-1">
                 Cancel
               </Button>
-              <Button type="submit" variant="hero" disabled={loading} className="flex-1">
-                {loading ? "Saving..." : room ? "Update Listing" : "Create Listing"}
+              <Button type="submit" variant="hero" disabled={loading || uploading} className="flex-1">
+                {uploading ? "Uploading images..." : loading ? "Saving..." : room ? "Update Listing" : "Create Listing"}
               </Button>
             </div>
           </form>
