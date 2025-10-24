@@ -32,7 +32,10 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchUserRole = async () => {
       if (!user) {
-        navigate("/auth");
+        if (!loading) {
+          // Only redirect if we've finished loading and confirmed no user
+          navigate("/auth");
+        }
         return;
       }
 
@@ -44,6 +47,7 @@ export default function Dashboard() {
 
       if (error) {
         console.error("Error fetching user role:", error);
+        setLoading(false);
         return;
       }
 
@@ -51,8 +55,17 @@ export default function Dashboard() {
       setLoading(false);
     };
 
-    fetchUserRole();
-  }, [user, navigate]);
+    // Give the auth state time to initialize
+    if (user !== null || session !== null) {
+      fetchUserRole();
+    } else {
+      // Check if we're done loading initial session
+      const timer = setTimeout(() => {
+        setLoading(false);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [user, session, navigate, loading]);
 
   if (loading) {
     return (
