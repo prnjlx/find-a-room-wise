@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MapPin, Edit, Trash2, Heart } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -27,7 +28,12 @@ interface RoomCardProps {
 }
 
 export default function RoomCard({ room, onEdit, onDelete, showActions }: RoomCardProps) {
+  const navigate = useNavigate();
   const [isFavorite, setIsFavorite] = useState(false);
+
+  const handleCardClick = () => {
+    navigate(`/room/${room.id}`);
+  };
 
   const handleFavorite = async () => {
     try {
@@ -62,7 +68,7 @@ export default function RoomCard({ room, onEdit, onDelete, showActions }: RoomCa
   };
 
   return (
-    <Card className="overflow-hidden card-hover group">
+    <Card className="overflow-hidden card-hover group cursor-pointer" onClick={handleCardClick}>
       <div className="relative h-48 bg-muted overflow-hidden">
         {room.images && room.images.length > 0 ? (
           <img
@@ -77,7 +83,10 @@ export default function RoomCard({ room, onEdit, onDelete, showActions }: RoomCa
         )}
         {!showActions && (
           <button
-            onClick={handleFavorite}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleFavorite();
+            }}
             className="absolute top-4 right-4 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
           >
             <Heart className={`h-5 w-5 ${isFavorite ? "fill-destructive text-destructive" : "text-foreground"}`} />
@@ -131,11 +140,24 @@ export default function RoomCard({ room, onEdit, onDelete, showActions }: RoomCa
 
       {showActions && onEdit && onDelete && (
         <CardFooter className="p-4 pt-0 gap-2">
-          <Button variant="outline" className="flex-1" onClick={() => onEdit(room)}>
+          <Button 
+            variant="outline" 
+            className="flex-1" 
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(room);
+            }}
+          >
             <Edit className="h-4 w-4 mr-2" />
             Edit
           </Button>
-          <Button variant="destructive" onClick={() => onDelete(room.id)}>
+          <Button 
+            variant="destructive" 
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(room.id);
+            }}
+          >
             <Trash2 className="h-4 w-4" />
           </Button>
         </CardFooter>
