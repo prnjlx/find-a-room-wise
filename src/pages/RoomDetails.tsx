@@ -112,17 +112,46 @@ export default function RoomDetails() {
     }
   };
 
-  const handleShare = () => {
+  const handleShare = async () => {
     const url = window.location.href;
-    if (navigator.share) {
-      navigator.share({
-        title: room?.title,
-        text: room?.description,
-        url: url,
-      });
-    } else {
-      navigator.clipboard.writeText(url);
-      toast.success("Link copied to clipboard");
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: room?.title,
+          text: room?.description,
+          url: url,
+        });
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast.success("Link copied to clipboard");
+      }
+    } catch (error: any) {
+      // User cancelled share or clipboard failed
+      if (error.name !== 'AbortError') {
+        // Fallback: copy to clipboard
+        try {
+          await navigator.clipboard.writeText(url);
+          toast.success("Link copied to clipboard");
+        } catch (clipboardError) {
+          toast.error("Failed to share");
+        }
+      }
+    }
+  };
+
+  const handleContactOwner = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Please login to contact the owner");
+        navigate("/auth");
+        return;
+      }
+      
+      // For now, show a toast. In future, this can open a messaging interface
+      toast.success("Contact feature coming soon! Owner will be notified.");
+    } catch (error) {
+      toast.error("Failed to initiate contact");
     }
   };
 
@@ -272,7 +301,12 @@ export default function RoomDetails() {
                 </div>
 
                 <div className="space-y-2">
-                  <Button className="w-full" size="lg" disabled={!room.is_available}>
+                  <Button 
+                    className="w-full" 
+                    size="lg" 
+                    disabled={!room.is_available}
+                    onClick={handleContactOwner}
+                  >
                     {room.is_available ? "Contact Owner" : "Not Available"}
                   </Button>
                   
