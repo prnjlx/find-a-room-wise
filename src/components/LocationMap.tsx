@@ -50,13 +50,10 @@ const LocationMap: React.FC<LocationMapProps> = ({ latitude, longitude, title })
   }, [latitude, longitude, title]);
 
   return (
-    <div className="space-y-2">
-      <span className="font-semibold">Location</span>
-      <div 
-        ref={mapContainer} 
-        className="w-full h-64 rounded-lg overflow-hidden border z-0"
-      />
-    </div>
+    <div 
+      ref={mapContainer} 
+      className="w-full h-64 rounded-lg overflow-hidden border z-0"
+    />
   );
 };
 
