@@ -1,10 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { MapPin } from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 interface LocationMapProps {
   latitude: number;
@@ -12,132 +8,53 @@ interface LocationMapProps {
   title?: string;
 }
 
-const MAPBOX_TOKEN_KEY = 'roomease_mapbox_token';
+// Fix for default marker icons in Leaflet with bundlers
+const defaultIcon = L.icon({
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
+
+L.Marker.prototype.options.icon = defaultIcon;
 
 const LocationMap: React.FC<LocationMapProps> = ({ latitude, longitude, title }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const [mapboxToken, setMapboxToken] = useState<string>('');
-  const [tokenInput, setTokenInput] = useState('');
-  const [mapError, setMapError] = useState(false);
+  const map = useRef<L.Map | null>(null);
 
   useEffect(() => {
-    const savedToken = localStorage.getItem(MAPBOX_TOKEN_KEY);
-    if (savedToken) {
-      setMapboxToken(savedToken);
+    if (!mapContainer.current) return;
+
+    // Initialize map
+    map.current = L.map(mapContainer.current).setView([latitude, longitude], 15);
+
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(map.current);
+
+    // Add marker
+    const marker = L.marker([latitude, longitude]).addTo(map.current);
+    
+    if (title) {
+      marker.bindPopup(`<strong>${title}</strong>`).openPopup();
     }
-  }, []);
 
-  useEffect(() => {
-    if (!mapContainer.current || !mapboxToken) return;
-
-    try {
-      mapboxgl.accessToken = mapboxToken;
-      
-      map.current = new mapboxgl.Map({
-        container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/streets-v12',
-        center: [longitude, latitude],
-        zoom: 14,
-      });
-
-      map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
-
-      // Add marker for the room location
-      new mapboxgl.Marker({ color: '#ea384c' })
-        .setLngLat([longitude, latitude])
-        .setPopup(
-          new mapboxgl.Popup({ offset: 25 })
-            .setHTML(`<strong>${title || 'Room Location'}</strong>`)
-        )
-        .addTo(map.current);
-
-      map.current.on('error', () => {
-        setMapError(true);
-      });
-
-      return () => {
-        map.current?.remove();
-      };
-    } catch (error) {
-      setMapError(true);
-    }
-  }, [mapboxToken, latitude, longitude, title]);
-
-  const handleSaveToken = () => {
-    if (tokenInput.trim()) {
-      localStorage.setItem(MAPBOX_TOKEN_KEY, tokenInput.trim());
-      setMapboxToken(tokenInput.trim());
-      setMapError(false);
-    }
-  };
-
-  const handleClearToken = () => {
-    localStorage.removeItem(MAPBOX_TOKEN_KEY);
-    setMapboxToken('');
-    setTokenInput('');
-    setMapError(false);
-  };
-
-  if (!mapboxToken || mapError) {
-    return (
-      <div className="space-y-4 p-4 bg-muted rounded-lg">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <MapPin className="h-5 w-5" />
-          <span className="font-medium">Map View</span>
-        </div>
-        
-        <p className="text-sm text-muted-foreground">
-          To view the location on map, please enter your Mapbox public token.
-          Get it from{' '}
-          <a 
-            href="https://mapbox.com/" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-primary underline"
-          >
-            mapbox.com
-          </a>
-          {' '}(Tokens section in dashboard)
-        </p>
-        
-        <div className="space-y-2">
-          <Label htmlFor="mapbox-token">Mapbox Public Token</Label>
-          <div className="flex gap-2">
-            <Input
-              id="mapbox-token"
-              type="text"
-              placeholder="pk.eyJ1..."
-              value={tokenInput}
-              onChange={(e) => setTokenInput(e.target.value)}
-              className="flex-1"
-            />
-            <Button onClick={handleSaveToken} disabled={!tokenInput.trim()}>
-              Save
-            </Button>
-          </div>
-        </div>
-        
-        {mapError && (
-          <p className="text-sm text-destructive">
-            Invalid token or map failed to load. Please check your token.
-          </p>
-        )}
-      </div>
-    );
-  }
+    // Cleanup
+    return () => {
+      map.current?.remove();
+    };
+  }, [latitude, longitude, title]);
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <span className="font-semibold">Location</span>
-        <Button variant="ghost" size="sm" onClick={handleClearToken}>
-          Change Token
-        </Button>
-      </div>
+      <span className="font-semibold">Location</span>
       <div 
         ref={mapContainer} 
-        className="w-full h-64 rounded-lg overflow-hidden border"
+        className="w-full h-64 rounded-lg overflow-hidden border z-0"
       />
     </div>
   );
