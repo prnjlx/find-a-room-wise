@@ -246,6 +246,19 @@ export default function RoomDetails() {
               )}
             </Card>
 
+            {/* Location Map */}
+            {room.latitude && room.longitude && (
+              <Card>
+                <CardContent className="p-6">
+                  <LocationMap 
+                    latitude={room.latitude} 
+                    longitude={room.longitude}
+                    title={room.title}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
             {/* Room Details */}
             <Card>
               <CardContent className="p-6 space-y-4">
@@ -331,15 +344,6 @@ export default function RoomDetails() {
                   </div>
                 </div>
 
-                {room.latitude && room.longitude && (
-                  <div className="pt-4 border-t">
-                    <LocationMap 
-                      latitude={room.latitude} 
-                      longitude={room.longitude}
-                      title={room.title}
-                    />
-                  </div>
-                )}
               </CardContent>
             </Card>
           </div>
