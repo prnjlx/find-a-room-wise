@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/Navbar";
 import { ArrowLeft, MapPin, Heart, Share2 } from "lucide-react";
 import { toast } from "sonner";
+import LocationMap from "@/components/LocationMap";
 
 interface Room {
   id: string;
@@ -332,10 +333,11 @@ export default function RoomDetails() {
 
                 {room.latitude && room.longitude && (
                   <div className="pt-4 border-t">
-                    <h3 className="font-semibold mb-2">Location</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Coordinates: {room.latitude.toFixed(4)}, {room.longitude.toFixed(4)}
-                    </p>
+                    <LocationMap 
+                      latitude={room.latitude} 
+                      longitude={room.longitude}
+                      title={room.title}
+                    />
                   </div>
                 )}
               </CardContent>
