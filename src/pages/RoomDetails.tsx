@@ -8,6 +8,11 @@ import { Navbar } from "@/components/Navbar";
 import { ArrowLeft, MapPin, Heart, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import LocationMap from "@/components/LocationMap";
+import RoomReviews from "@/components/room/RoomReviews";
+import ReportListing from "@/components/room/ReportListing";
+import NeighborhoodInsights from "@/components/room/NeighborhoodInsights";
+import ListingCompletenessScore from "@/components/room/ListingCompletenessScore";
+import VerifiedBadge from "@/components/room/VerifiedBadge";
 
 interface Room {
   id: string;
@@ -32,6 +37,7 @@ export default function RoomDetails() {
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [ownerProfile, setOwnerProfile] = useState<{ is_phone_verified: boolean; is_document_verified: boolean } | null>(null);
 
   useEffect(() => {
     fetchRoomDetails();
@@ -55,7 +61,14 @@ export default function RoomDetails() {
       }
 
       setRoom(data);
-    } catch (error) {
+
+      // Fetch owner verification status
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("is_phone_verified, is_document_verified")
+        .eq("id", data.owner_id)
+        .maybeSingle();
+      setOwnerProfile(profile);
       console.error("Error fetching room:", error);
       toast.error("Failed to load room details");
     } finally {
@@ -270,6 +283,15 @@ export default function RoomDetails() {
                   </div>
                 </div>
 
+                {/* Owner Verification Badges */}
+                {ownerProfile && (
+                  <VerifiedBadge
+                    isDocumentVerified={ownerProfile.is_document_verified}
+                    isPhoneVerified={ownerProfile.is_phone_verified}
+                    isEmailVerified={true}
+                  />
+                )}
+
                 <div className="flex flex-wrap gap-2">
                   <Badge variant="secondary">{room.room_type}</Badge>
                   <Badge variant="outline">{room.furnishing_status}</Badge>
@@ -301,6 +323,22 @@ export default function RoomDetails() {
                     </div>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+
+            {/* Neighborhood Insights */}
+            {room.latitude && room.longitude && (
+              <Card>
+                <CardContent className="p-6">
+                  <NeighborhoodInsights latitude={room.latitude} longitude={room.longitude} />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Reviews */}
+            <Card>
+              <CardContent className="p-6">
+                <RoomReviews roomId={room.id} />
               </CardContent>
             </Card>
           </div>
@@ -342,6 +380,14 @@ export default function RoomDetails() {
                       Share
                     </Button>
                   </div>
+                </div>
+
+                {/* Listing Quality Score */}
+                <ListingCompletenessScore room={room} />
+
+                {/* Report */}
+                <div className="flex justify-center pt-2 border-t">
+                  <ReportListing roomId={room.id} />
                 </div>
 
               </CardContent>

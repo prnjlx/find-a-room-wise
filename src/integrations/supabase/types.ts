@@ -57,6 +57,8 @@ export type Database = {
           email: string
           full_name: string | null
           id: string
+          is_document_verified: boolean | null
+          is_phone_verified: boolean | null
           phone: string | null
           updated_at: string | null
           user_role: Database["public"]["Enums"]["user_role"]
@@ -67,6 +69,8 @@ export type Database = {
           email: string
           full_name?: string | null
           id: string
+          is_document_verified?: boolean | null
+          is_phone_verified?: boolean | null
           phone?: string | null
           updated_at?: string | null
           user_role: Database["public"]["Enums"]["user_role"]
@@ -77,11 +81,86 @@ export type Database = {
           email?: string
           full_name?: string | null
           id?: string
+          is_document_verified?: boolean | null
+          is_phone_verified?: boolean | null
           phone?: string | null
           updated_at?: string | null
           user_role?: Database["public"]["Enums"]["user_role"]
         }
         Relationships: []
+      }
+      room_reports: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          reason: string
+          reporter_id: string
+          room_id: string
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          reason: string
+          reporter_id: string
+          room_id: string
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          reason?: string
+          reporter_id?: string
+          room_id?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_reports_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      room_reviews: {
+        Row: {
+          created_at: string | null
+          id: string
+          rating: number
+          review_text: string | null
+          room_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          rating: number
+          review_text?: string | null
+          room_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          rating?: number
+          review_text?: string | null
+          room_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_reviews_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       rooms: {
         Row: {
