@@ -39,6 +39,8 @@ export default function RoomDetails() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [ownerProfile, setOwnerProfile] = useState<{ is_phone_verified: boolean; is_document_verified: boolean } | null>(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   useEffect(() => {
     fetchRoomDetails();
