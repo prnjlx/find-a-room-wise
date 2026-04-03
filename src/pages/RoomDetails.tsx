@@ -398,6 +398,46 @@ export default function RoomDetails() {
             </Card>
           </div>
         </div>
+
+        {/* Fullscreen Image Lightbox */}
+        <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
+          <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 bg-black/95 border-none">
+            {room.images && room.images.length > 0 && (
+              <div className="relative flex items-center justify-center w-full h-[90vh]">
+                <img
+                  src={room.images[lightboxIndex]}
+                  alt={`${room.title} ${lightboxIndex + 1}`}
+                  className="max-w-full max-h-full object-contain"
+                />
+                {room.images.length > 1 && (
+                  <>
+                    <button
+                      onClick={() => setLightboxIndex((prev) => (prev - 1 + room.images.length) % room.images.length)}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/20 hover:bg-white/40 text-white text-2xl"
+                    >
+                      ‹
+                    </button>
+                    <button
+                      onClick={() => setLightboxIndex((prev) => (prev + 1) % room.images.length)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/20 hover:bg-white/40 text-white text-2xl"
+                    >
+                      ›
+                    </button>
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                      {room.images.map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setLightboxIndex(index)}
+                          className={`w-3 h-3 rounded-full transition-colors ${index === lightboxIndex ? "bg-white" : "bg-white/40"}`}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
