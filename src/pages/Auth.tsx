@@ -90,19 +90,31 @@ export default function Auth() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="container mx-auto px-4 py-16 flex items-center justify-center">
-        <Card className="w-full max-w-md shadow-card">
-          <CardHeader className="space-y-1">
-            <div className="flex items-center justify-center mb-4">
-              <div className="p-3 rounded-full bg-accent">
-                <Home className="h-8 w-8 text-primary" />
+      <div
+        className="relative min-h-[calc(100vh-73px)] bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage:
+            "url('https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1920&q=80')",
+        }}
+      >
+        {/* Contrast overlay so the card text remains highly readable */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/80 via-primary/60 to-secondary/70 backdrop-blur-sm" />
+
+        <div className="relative container mx-auto px-4 py-16 flex items-center justify-center">
+          <Card className="w-full max-w-md border-2 border-white/40 bg-card/95 backdrop-blur-md shadow-elegant">
+            <CardHeader className="space-y-1">
+              <div className="flex items-center justify-center mb-4">
+                <div className="p-3 rounded-full bg-accent">
+                  <Home className="h-8 w-8 text-primary" />
+                </div>
               </div>
-            </div>
-            <CardTitle className="text-2xl text-center">Welcome to RoomEase</CardTitle>
-            <CardDescription className="text-center">
-              Find your perfect room or list your space
-            </CardDescription>
-          </CardHeader>
+              <CardTitle className="text-3xl font-bold text-center text-foreground">
+                Welcome to RoomEase
+              </CardTitle>
+              <CardDescription className="text-center text-base text-muted-foreground">
+                Find your perfect room or list your space
+              </CardDescription>
+            </CardHeader>
           <CardContent>
             <Tabs defaultValue="login" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
@@ -202,7 +214,9 @@ export default function Auth() {
             </Tabs>
           </CardContent>
         </Card>
+        </div>
       </div>
     </div>
   );
 }
+
