@@ -400,15 +400,62 @@ export default function RoomDetails() {
                 </div>
 
                 <div className="space-y-2">
-                  <Button 
-                    className="w-full" 
-                    size="lg" 
-                    disabled={!room.is_available}
-                    onClick={handleContactOwner}
+                  {/* Owner Contact Info */}
+                  {(ownerProfile?.email || ownerProfile?.phone) ? (
+                    <div className="rounded-lg border bg-accent/50 p-3 space-y-1 text-sm">
+                      <div className="font-semibold text-foreground">
+                        {ownerProfile.full_name ?? "Room Owner"}
+                      </div>
+                      {ownerProfile.email && (
+                        <div className="flex items-center gap-2 text-muted-foreground break-all">
+                          <Mail className="h-3.5 w-3.5 shrink-0" />
+                          <span>{ownerProfile.email}</span>
+                        </div>
+                      )}
+                      {ownerProfile.phone && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Phone className="h-3.5 w-3.5 shrink-0" />
+                          <span>{ownerProfile.phone}</span>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="rounded-lg border bg-muted p-3 text-xs text-muted-foreground">
+                      Owner has not added contact details yet.
+                    </div>
+                  )}
+
+                  <Button
+                    className="w-full"
+                    size="lg"
+                    disabled={!room.is_available || !ownerProfile?.phone}
+                    onClick={handleWhatsApp}
                   >
-                    {room.is_available ? "Contact Owner" : "Not Available"}
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    {room.is_available ? "Contact on WhatsApp" : "Not Available"}
                   </Button>
-                  
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={handleEmail}
+                      disabled={!ownerProfile?.email}
+                      className="w-full"
+                    >
+                      <Mail className="h-4 w-4 mr-2" />
+                      Email
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={handleCall}
+                      disabled={!ownerProfile?.phone}
+                      className="w-full"
+                    >
+                      <Phone className="h-4 w-4 mr-2" />
+                      Call
+                    </Button>
+                  </div>
+
                   <div className="grid grid-cols-2 gap-2">
                     <Button
                       variant="outline"
