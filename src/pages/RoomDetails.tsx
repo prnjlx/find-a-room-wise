@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/Navbar";
-import { ArrowLeft, MapPin, Heart, Share2 } from "lucide-react";
+import { ArrowLeft, MapPin, Heart, Share2, Mail, Phone, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import LocationMap from "@/components/LocationMap";
 import RoomReviews from "@/components/room/RoomReviews";
@@ -29,6 +29,15 @@ interface Room {
   latitude?: number;
   longitude?: number;
   created_at: string;
+  owner_id: string;
+}
+
+interface OwnerProfile {
+  is_phone_verified: boolean;
+  is_document_verified: boolean;
+  full_name: string | null;
+  email: string | null;
+  phone: string | null;
 }
 
 export default function RoomDetails() {
@@ -38,7 +47,7 @@ export default function RoomDetails() {
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [ownerProfile, setOwnerProfile] = useState<{ is_phone_verified: boolean; is_document_verified: boolean } | null>(null);
+  const [ownerProfile, setOwnerProfile] = useState<OwnerProfile | null>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
@@ -56,7 +65,7 @@ export default function RoomDetails() {
         .maybeSingle();
 
       if (error) throw error;
-      
+
       if (!data) {
         toast.error("Room not found");
         navigate("/dashboard");
@@ -65,13 +74,14 @@ export default function RoomDetails() {
 
       setRoom(data);
 
-      // Fetch owner verification status
+      // Fetch owner profile (verification + contact info)
       const { data: profile } = await supabase
         .from("profiles")
-        .select("is_phone_verified, is_document_verified")
+        .select("is_phone_verified, is_document_verified, full_name, email, phone")
         .eq("id", data.owner_id)
         .maybeSingle();
       setOwnerProfile(profile);
+    } catch (error) {
       console.error("Error fetching room:", error);
       toast.error("Failed to load room details");
     } finally {
