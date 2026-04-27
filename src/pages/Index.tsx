@@ -7,37 +7,37 @@ import heroImage from "@/assets/hero-bg.jpg";
 
 export default function Index() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[hsl(222_60%_12%)] text-white">
       <Navbar />
       
       {/* Hero Section */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 hero-gradient opacity-90" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[hsl(222_70%_14%)] via-[hsl(218_65%_20%)] to-[hsl(210_70%_28%)] opacity-95" />
         <div className="absolute inset-0">
           <img
             src={heroImage}
             alt="Modern apartment interior"
-            className="w-full h-full object-cover mix-blend-overlay opacity-30"
+            className="w-full h-full object-cover mix-blend-overlay opacity-25"
           />
         </div>
         
         <div className="relative container mx-auto px-4 py-24 md:py-32">
-          <div className="max-w-3xl mx-auto text-center text-primary-foreground">
+          <div className="max-w-3xl mx-auto text-center text-white">
             <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-              Find Your Perfect Room with <span className="text-secondary">RoomEase</span>
+              Find Your Perfect Room with <span className="text-[hsl(205_95%_75%)]">RoomEase</span>
             </h1>
-            <p className="text-lg md:text-xl mb-8 text-primary-foreground/90">
+            <p className="text-lg md:text-xl mb-8 text-white/90">
               Connect with room owners and seekers in a smart, intuitive platform. 
               Your next home is just a click away.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" variant="secondary" asChild className="text-lg px-8">
+              <Button size="lg" asChild className="text-lg px-8 bg-[hsl(205_95%_70%)] text-[hsl(222_60%_12%)] hover:bg-[hsl(205_95%_78%)]">
                 <Link to="/auth">
                   Get Started
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild className="text-lg px-8 bg-white/10 border-white/20 text-white hover:bg-white/20">
+              <Button size="lg" variant="outline" asChild className="text-lg px-8 bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white">
                 <Link to="/auth">
                   Browse Rooms
                 </Link>
