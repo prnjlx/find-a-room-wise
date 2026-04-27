@@ -166,20 +166,53 @@ export default function RoomDetails() {
     }
   };
 
-  const handleContactOwner = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error("Please login to contact the owner");
-        navigate("/auth");
-        return;
-      }
-      
-      // For now, show a toast. In future, this can open a messaging interface
-      toast.success("Contact feature coming soon! Owner will be notified.");
-    } catch (error) {
-      toast.error("Failed to initiate contact");
+  const requireAuth = async (): Promise<boolean> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast.error("Please login to contact the owner");
+      navigate("/auth");
+      return false;
     }
+    return true;
+  };
+
+  const handleEmail = async () => {
+    if (!(await requireAuth())) return;
+    if (!ownerProfile?.email) {
+      toast.error("Owner has not added an email yet");
+      return;
+    }
+    const subject = encodeURIComponent(`Inquiry about: ${room?.title ?? "your room"}`);
+    const body = encodeURIComponent(
+      `Hi ${ownerProfile.full_name ?? "there"},\n\nI'm interested in your room "${room?.title}" listed on RoomEase. Could you share more details?\n\nThanks!`
+    );
+    window.location.href = `mailto:${ownerProfile.email}?subject=${subject}&body=${body}`;
+  };
+
+  const handleCall = async () => {
+    if (!(await requireAuth())) return;
+    if (!ownerProfile?.phone) {
+      toast.error("Owner has not added a phone number yet");
+      return;
+    }
+    window.location.href = `tel:${ownerProfile.phone.replace(/\s+/g, "")}`;
+  };
+
+  const handleWhatsApp = async () => {
+    if (!(await requireAuth())) return;
+    if (!ownerProfile?.phone) {
+      toast.error("Owner has not added a phone number yet");
+      return;
+    }
+    const digits = ownerProfile.phone.replace(/[^\d]/g, "");
+    if (!digits) {
+      toast.error("Invalid phone number");
+      return;
+    }
+    const message = encodeURIComponent(
+      `Hi ${ownerProfile.full_name ?? "there"}, I'm interested in your room "${room?.title}" on RoomEase.`
+    );
+    window.open(`https://wa.me/${digits}?text=${message}`, "_blank", "noopener,noreferrer");
   };
 
   if (loading) {
