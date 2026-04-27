@@ -97,8 +97,8 @@ export default function Auth() {
             "url('https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1920&q=80')",
         }}
       >
-        {/* Contrast overlay so the card text remains highly readable */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/80 via-primary/60 to-secondary/70 backdrop-blur-sm" />
+        {/* Dark blue contrast overlay so the card text remains highly readable */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[hsl(222_70%_14%)]/90 via-[hsl(218_65%_22%)]/80 to-[hsl(205_75%_38%)]/80 backdrop-blur-sm" />
 
         <div className="relative container mx-auto px-4 py-16 flex items-center justify-center">
           <Card className="w-full max-w-md border-2 border-white/40 bg-card/95 backdrop-blur-md shadow-elegant">
