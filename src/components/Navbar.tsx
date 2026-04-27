@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Home, LogOut, User } from "lucide-react";
+import { Home, LogOut, User, UserCog } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { User as SupabaseUser } from "@supabase/supabase-js";
@@ -48,6 +48,12 @@ export const Navbar = () => {
                   <Link to="/dashboard">
                     <User className="h-4 w-4 mr-2" />
                     Dashboard
+                  </Link>
+                </Button>
+                <Button variant="ghost" asChild>
+                  <Link to="/profile">
+                    <UserCog className="h-4 w-4 mr-2" />
+                    Profile
                   </Link>
                 </Button>
                 <Button variant="outline" onClick={handleLogout}>
