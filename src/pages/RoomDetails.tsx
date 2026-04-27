@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/Navbar";
-import { ArrowLeft, MapPin, Heart, Share2 } from "lucide-react";
+import { ArrowLeft, MapPin, Heart, Share2, Mail, Phone, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import LocationMap from "@/components/LocationMap";
 import RoomReviews from "@/components/room/RoomReviews";
@@ -29,6 +29,15 @@ interface Room {
   latitude?: number;
   longitude?: number;
   created_at: string;
+  owner_id: string;
+}
+
+interface OwnerProfile {
+  is_phone_verified: boolean;
+  is_document_verified: boolean;
+  full_name: string | null;
+  email: string | null;
+  phone: string | null;
 }
 
 export default function RoomDetails() {
@@ -38,7 +47,7 @@ export default function RoomDetails() {
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [ownerProfile, setOwnerProfile] = useState<{ is_phone_verified: boolean; is_document_verified: boolean } | null>(null);
+  const [ownerProfile, setOwnerProfile] = useState<OwnerProfile | null>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
@@ -56,7 +65,7 @@ export default function RoomDetails() {
         .maybeSingle();
 
       if (error) throw error;
-      
+
       if (!data) {
         toast.error("Room not found");
         navigate("/dashboard");
@@ -65,13 +74,14 @@ export default function RoomDetails() {
 
       setRoom(data);
 
-      // Fetch owner verification status
+      // Fetch owner profile (verification + contact info)
       const { data: profile } = await supabase
         .from("profiles")
-        .select("is_phone_verified, is_document_verified")
+        .select("is_phone_verified, is_document_verified, full_name, email, phone")
         .eq("id", data.owner_id)
         .maybeSingle();
       setOwnerProfile(profile);
+    } catch (error) {
       console.error("Error fetching room:", error);
       toast.error("Failed to load room details");
     } finally {
@@ -156,20 +166,53 @@ export default function RoomDetails() {
     }
   };
 
-  const handleContactOwner = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error("Please login to contact the owner");
-        navigate("/auth");
-        return;
-      }
-      
-      // For now, show a toast. In future, this can open a messaging interface
-      toast.success("Contact feature coming soon! Owner will be notified.");
-    } catch (error) {
-      toast.error("Failed to initiate contact");
+  const requireAuth = async (): Promise<boolean> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast.error("Please login to contact the owner");
+      navigate("/auth");
+      return false;
     }
+    return true;
+  };
+
+  const handleEmail = async () => {
+    if (!(await requireAuth())) return;
+    if (!ownerProfile?.email) {
+      toast.error("Owner has not added an email yet");
+      return;
+    }
+    const subject = encodeURIComponent(`Inquiry about: ${room?.title ?? "your room"}`);
+    const body = encodeURIComponent(
+      `Hi ${ownerProfile.full_name ?? "there"},\n\nI'm interested in your room "${room?.title}" listed on RoomEase. Could you share more details?\n\nThanks!`
+    );
+    window.location.href = `mailto:${ownerProfile.email}?subject=${subject}&body=${body}`;
+  };
+
+  const handleCall = async () => {
+    if (!(await requireAuth())) return;
+    if (!ownerProfile?.phone) {
+      toast.error("Owner has not added a phone number yet");
+      return;
+    }
+    window.location.href = `tel:${ownerProfile.phone.replace(/\s+/g, "")}`;
+  };
+
+  const handleWhatsApp = async () => {
+    if (!(await requireAuth())) return;
+    if (!ownerProfile?.phone) {
+      toast.error("Owner has not added a phone number yet");
+      return;
+    }
+    const digits = ownerProfile.phone.replace(/[^\d]/g, "");
+    if (!digits) {
+      toast.error("Invalid phone number");
+      return;
+    }
+    const message = encodeURIComponent(
+      `Hi ${ownerProfile.full_name ?? "there"}, I'm interested in your room "${room?.title}" on RoomEase.`
+    );
+    window.open(`https://wa.me/${digits}?text=${message}`, "_blank", "noopener,noreferrer");
   };
 
   if (loading) {
@@ -357,15 +400,62 @@ export default function RoomDetails() {
                 </div>
 
                 <div className="space-y-2">
-                  <Button 
-                    className="w-full" 
-                    size="lg" 
-                    disabled={!room.is_available}
-                    onClick={handleContactOwner}
+                  {/* Owner Contact Info */}
+                  {(ownerProfile?.email || ownerProfile?.phone) ? (
+                    <div className="rounded-lg border bg-accent/50 p-3 space-y-1 text-sm">
+                      <div className="font-semibold text-foreground">
+                        {ownerProfile.full_name ?? "Room Owner"}
+                      </div>
+                      {ownerProfile.email && (
+                        <div className="flex items-center gap-2 text-muted-foreground break-all">
+                          <Mail className="h-3.5 w-3.5 shrink-0" />
+                          <span>{ownerProfile.email}</span>
+                        </div>
+                      )}
+                      {ownerProfile.phone && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Phone className="h-3.5 w-3.5 shrink-0" />
+                          <span>{ownerProfile.phone}</span>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="rounded-lg border bg-muted p-3 text-xs text-muted-foreground">
+                      Owner has not added contact details yet.
+                    </div>
+                  )}
+
+                  <Button
+                    className="w-full"
+                    size="lg"
+                    disabled={!room.is_available || !ownerProfile?.phone}
+                    onClick={handleWhatsApp}
                   >
-                    {room.is_available ? "Contact Owner" : "Not Available"}
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    {room.is_available ? "Contact on WhatsApp" : "Not Available"}
                   </Button>
-                  
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={handleEmail}
+                      disabled={!ownerProfile?.email}
+                      className="w-full"
+                    >
+                      <Mail className="h-4 w-4 mr-2" />
+                      Email
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={handleCall}
+                      disabled={!ownerProfile?.phone}
+                      className="w-full"
+                    >
+                      <Phone className="h-4 w-4 mr-2" />
+                      Call
+                    </Button>
+                  </div>
+
                   <div className="grid grid-cols-2 gap-2">
                     <Button
                       variant="outline"

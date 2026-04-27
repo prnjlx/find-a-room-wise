@@ -16,38 +16,38 @@
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 10%;
 
-    /* Primary - Vibrant Purple */
-    --primary: 271 81% 56%;
+    /* Primary - Deep Teal */
+    --primary: 178 78% 36%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 271 81% 50%;
-    
-    /* Secondary - Electric Cyan */
-    --secondary: 189 94% 43%;
+    --primary-hover: 178 78% 30%;
+
+    /* Secondary - Warm Coral */
+    --secondary: 16 92% 60%;
     --secondary-foreground: 0 0% 100%;
-    --secondary-hover: 189 94% 38%;
+    --secondary-hover: 16 92% 54%;
 
-    --muted: 240 5% 96%;
-    --muted-foreground: 240 4% 46%;
+    --muted: 180 14% 96%;
+    --muted-foreground: 200 10% 40%;
 
-    --accent: 271 81% 96%;
-    --accent-foreground: 271 81% 56%;
+    --accent: 178 60% 94%;
+    --accent-foreground: 178 78% 28%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 6% 90%;
-    --input: 240 6% 90%;
-    --ring: 271 81% 56%;
+    --border: 200 14% 88%;
+    --input: 200 14% 88%;
+    --ring: 178 78% 36%;
 
     --radius: 0.75rem;
 
-    /* Custom design tokens - vibrant gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(271 81% 56%), hsl(271 81% 66%));
-    --gradient-hero: linear-gradient(135deg, hsl(271 81% 56% / 0.95), hsl(189 94% 43% / 0.9));
-    --gradient-accent: linear-gradient(135deg, hsl(271 81% 56%), hsl(189 94% 43%));
-    --shadow-elegant: 0 10px 40px -10px hsl(271 81% 56% / 0.3);
-    --shadow-card: 0 4px 20px hsl(271 81% 56% / 0.1);
-    --shadow-glow: 0 0 40px hsl(271 81% 56% / 0.2);
+    /* Custom design tokens - fresh gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(178 78% 36%), hsl(168 76% 44%));
+    --gradient-hero: linear-gradient(135deg, hsl(178 78% 36% / 0.95), hsl(16 92% 60% / 0.9));
+    --gradient-accent: linear-gradient(135deg, hsl(178 78% 36%), hsl(16 92% 60%));
+    --shadow-elegant: 0 10px 40px -10px hsl(178 78% 36% / 0.35);
+    --shadow-card: 0 4px 20px hsl(178 78% 36% / 0.12);
+    --shadow-glow: 0 0 40px hsl(178 78% 36% / 0.25);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     --sidebar-background: 0 0% 98%;
@@ -70,33 +70,33 @@
     --popover: 240 8% 14%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 271 81% 65%;
-    --primary-foreground: 0 0% 100%;
-    --primary-hover: 271 81% 70%;
+    --primary: 178 70% 50%;
+    --primary-foreground: 200 30% 8%;
+    --primary-hover: 178 70% 56%;
 
-    --secondary: 189 94% 50%;
-    --secondary-foreground: 240 10% 10%;
-    --secondary-hover: 189 94% 55%;
+    --secondary: 16 92% 64%;
+    --secondary-foreground: 200 30% 8%;
+    --secondary-hover: 16 92% 70%;
 
-    --muted: 240 8% 18%;
-    --muted-foreground: 240 5% 65%;
+    --muted: 200 10% 18%;
+    --muted-foreground: 200 8% 65%;
 
-    --accent: 240 8% 18%;
+    --accent: 200 10% 18%;
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 63% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 8% 18%;
-    --input: 240 8% 18%;
-    --ring: 271 81% 65%;
+    --border: 200 10% 20%;
+    --input: 200 10% 20%;
+    --ring: 178 70% 50%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(271 81% 65%), hsl(271 81% 75%));
-    --gradient-hero: linear-gradient(135deg, hsl(271 81% 65% / 0.95), hsl(189 94% 50% / 0.9));
-    --gradient-accent: linear-gradient(135deg, hsl(271 81% 65%), hsl(189 94% 50%));
-    --shadow-elegant: 0 10px 40px -10px hsl(271 81% 65% / 0.4);
-    --shadow-card: 0 4px 20px hsl(271 81% 65% / 0.15);
-    --shadow-glow: 0 0 40px hsl(271 81% 65% / 0.3);
+    --gradient-primary: linear-gradient(135deg, hsl(178 70% 50%), hsl(168 70% 56%));
+    --gradient-hero: linear-gradient(135deg, hsl(178 70% 50% / 0.95), hsl(16 92% 64% / 0.9));
+    --gradient-accent: linear-gradient(135deg, hsl(178 70% 50%), hsl(16 92% 64%));
+    --shadow-elegant: 0 10px 40px -10px hsl(178 70% 50% / 0.4);
+    --shadow-card: 0 4px 20px hsl(178 70% 50% / 0.18);
+    --shadow-glow: 0 0 40px hsl(178 70% 50% / 0.3);
     
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
